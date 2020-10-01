@@ -4,26 +4,26 @@ module.exports = {
 
     async run (client, message, args){
         const messageArray = message.content.split(' ');
-        const args = messageArray.slice(1);
+        const arg = messageArray.slice(1);
 
         if(!message.member.permissions.has("MANAGE_MESSAGES")) return message.channel.send(`You are not allowed to use that command!`);
 
         let deleteAmount;
 
         if(isNaN(args[0]) || parseInt(args[0] <= 0)){
-            return message.reply("Amount is not a number!");
+            return message.channel.send("Amount is not a number!");
         }
 
         if(parseInt(args[0]) < 1 || parseInt(args[0]) > 100){
-            return message.reply("Invalid amount!");
+            return message.channel.send("Invalid amount!");
         } else{
             deleteAmount = parseInt(args[0]);
         }
 
         message.channel.bulkDelete(deleteAmount + 1, true);
-        message.channel.send(`Successfully deleted **${deleteAmount}** messages.`)
+        message.channel.send(`Successfully deleted **${deleteAmount}** message(s).`)
         .then(msg => {
-            msg.delete({timeout: 10000})
+            msg.delete({timeout: 5000})
         });
 
     }

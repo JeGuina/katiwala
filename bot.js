@@ -28,6 +28,33 @@ client.on('guildMemberAdd', member => {
     channel.send(`Yo! What's up, ${member}? Welcome to the Trust Issues PH Server! Enjoy!`);
 });
 
+client.on('messageDelete', async message => {
+    if(message.author.bot) return;
+    const logchannel = message.guild.channels.cache.find(ch => ch.name === "message-logs")
+    if(!logchannel) return;
+
+    const embed = new Discord.MessageEmbed()
+    .setTitle("Message deleted | " +message.author.tag)
+    .addField("Deleted", `${message.content.slice(0, 950)}\n\u200b`)
+    .addField("In Channel", message.channel)
+
+    logchannel.send(embed);
+});
+
+client.on("messageUpdate", async message => {
+
+    if(message.author.bot) return;
+    let logchannel = message.guild.channels.cache.find(ch => ch.name === "message-logs")
+    if(!logchannel) return
+
+    const embed = new Discord.MessageEmbed()
+    .setTitle("Message edited |" +message.author.tag)
+    .addField("Before edit", `${message.content.slice(0, 950)}\n\u200b`)
+    .addField("In channel", message.channel)
+
+    logchannel.send(embed);
+})
+
 client.on("message", async message => {
     if(message.author.bot) return;
     if(message.channel.type == 'dm') return;
