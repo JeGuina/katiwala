@@ -23,7 +23,7 @@ client.on('ready', () => {
     console.log(`${client.user.tag} is now online!`);
     const guild = client.guilds.cache.get("750710232887591013");
     var memberCount = guild.members.cache.filter(member => !member.user.bot).size;
-    client.user.setActivity(`with ${memberCount} members`, { type: "PLAYING" });
+    client.user.setActivity(`with ${memberCount} crewmates`, { type: "PLAYING" });
 });
 
 
