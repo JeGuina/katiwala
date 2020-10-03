@@ -2,9 +2,11 @@ require('dotenv').config();
 const fs = require('fs');
 const Discord = require('discord.js');
 const client = new Discord.Client();
-const PREFIX = process.env.PREFIX;
-const { token } = require('./config.json');
+const Canvacord = require('canvacord');
+
 client.commands = new Discord.Collection();
+client.db = require('quick.db');
+client.cooldown = new Discord.Collection();
 
 const prefix = process.env.PREFIX;
 
@@ -19,13 +21,27 @@ client.on('error', console.error);
 
 client.on('ready', () => {
     console.log(`${client.user.tag} is now online!`);
+    const guild = client.guilds.cache.get("750710232887591013");
+    var memberCount = guild.members.cache.filter(member => !member.user.bot).size;
+    client.user.setActivity(`with ${memberCount} members`, { type: "PLAYING" });
 });
+
+
 
 client.on('guildMemberAdd', member => {
     const channel = member.guild.channels.cache.find(channel => channel.name === "welcome");
     if(!channel) return;
 
     channel.send(`Yo! What's up, ${member}? Welcome to the Trust Issues PH Server! Enjoy!`);
+    const guild = client.guilds.cache.get("750710232887591013");
+    var memberCount = guild.members.cache.filter(member => !member.user.bot).size;
+    client.user.setActivity(`with ${memberCount} members`, { type: "PLAYING" });
+});
+
+client.on('guildMemberRemove', member => {
+    const guild = client.guilds.cache.get("750710232887591013");
+    var memberCount = guild.members.cache.filter(member => !member.user.bot).size;
+    client.user.setActivity(`with ${memberCount} members`, { type: "PLAYING" });
 });
 
 client.on('messageDelete', async message => {
@@ -59,6 +75,8 @@ client.on("message", async message => {
     if(message.author.bot) return;
     if(message.channel.type == 'dm') return;
 
+    // xp(message); **for XP stuff soon
+
     if(message.content.startsWith(prefix)){
         const args = message.content.slice(prefix.length).trim().split(/ +/);
         const command = args.shift().toLowerCase();
@@ -72,6 +90,22 @@ client.on("message", async message => {
         }
     }
 });
+
+// function xp(message) {
+//     if (!client.cooldown.has(`${message.author.id}`) || !(Date.now() - client.cooldown.get(`${message.author.id}`) > process.env.COOLDOWN)) {
+//         let xp = client.db.add(`xp_${message.author.id}`, 1);
+//         let level = Math.floor(0.3 * Math.sqrt(xp));
+//         let lvl = client.db.get(`level_${message.author.id}`) || client.db.set(`level_${message.author.id}`,1);;
+//         if (level > lvl) {
+//             let newLevel = client.db.set(`level_${message.author.id}`,level);
+//             message.channel.send(`GG! :tada: **${message.author.toString()}!** You just advanced to level **${newLevel}!**`);
+//         }
+//         client.cooldown.set(`${message.author.id}`, Date.now());
+//     }
+// }
+
+//remove comment for xp stuff sooooon
+
 
 client.login(process.env.BOT_TOKEN);
 
