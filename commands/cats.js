@@ -4,6 +4,7 @@ const Discord = require('discord.js');
 module.exports = {
     name: "meow",
     description: "gives you a random cat pic",
+    aliases: ["cat"],
     
     async run (client, message, args){
         const subReddits = ["cats"]

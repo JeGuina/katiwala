@@ -4,6 +4,7 @@ const { run } = require('./ping');
 module.exports = {
     name: "avatar",
     description: "show a user's avatar",
+    aliases: ["icon", "pfp", "dp"],
 
     async run(client, message, args) {
         let member = message.mentions.users.first() || message.author;

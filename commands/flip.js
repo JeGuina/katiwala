@@ -3,6 +3,7 @@ const Discord = require('discord.js');
 module.exports = {
     name: "flip",
     description: "flip a coin",
+    aliases: ["coin"],
 
     async run (client, message, args){
         var choices = [

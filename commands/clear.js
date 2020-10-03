@@ -1,6 +1,7 @@
 module.exports = {
     name: "clear",
     description: "Clear messages",
+    aliases: ["prune", "del"],
 
     async run (client, message, args){
         const messageArray = message.content.split(' ');
