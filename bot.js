@@ -98,7 +98,7 @@ client.on("message", async message => {
 //         let lvl = client.db.get(`level_${message.author.id}`) || client.db.set(`level_${message.author.id}`,1);;
 //         if (level > lvl) {
 //             let newLevel = client.db.set(`level_${message.author.id}`,level);
-//             message.channel.send(`GG! :tada: **${message.author.toString()}!** You just advanced to level **${newLevel}!**`);
+//             message.channel.send(`:tada: GG! **${message.author.toString()}!** You just advanced to level **${newLevel}!**`);
 //         }
 //         client.cooldown.set(`${message.author.id}`, Date.now());
 //     }
