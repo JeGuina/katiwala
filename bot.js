@@ -2,7 +2,6 @@ require('dotenv').config();
 const fs = require('fs');
 const Discord = require('discord.js');
 const client = new Discord.Client();
-const Canvacord = require('canvacord');
 
 client.commands = new Discord.Collection();
 client.db = require('quick.db');
