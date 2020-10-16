@@ -46,7 +46,13 @@ client.on('guildMemberRemove', member => {
 client.on('messageDelete', async message => {
     if(message.author.bot) return;
     const logchannel = message.guild.channels.cache.find(ch => ch.name === "message-logs")
+    const vchan = message.channel.id == '765833025216053249';
     if(!logchannel) return;
+
+    if(vchan){
+        return
+    }
+    else {
 
     const embed = new Discord.MessageEmbed()
     .setTitle("Message deleted | " +message.author.tag)
@@ -54,6 +60,7 @@ client.on('messageDelete', async message => {
     .addField("In Channel", message.channel)
 
     logchannel.send(embed);
+    }
 });
 
 client.on("messageUpdate", async message => {
@@ -109,4 +116,3 @@ client.on("message", async message => {
 
 
 client.login(process.env.BOT_TOKEN);
-
