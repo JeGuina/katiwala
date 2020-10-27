@@ -1,12 +1,8 @@
-const Discord = require('discord.js');
-
 module.exports = {
     name: "ping",
-    description: "ping",
-    async run(client, message, args){
-        const ping = new Discord.MessageEmbed()
-        .setDescription(`🏓 Pong!`);
+    description: "pings the pong",
 
-        message.channel.send(ping);
+    async run (client, message, args){
+        return message.reply("Pong! "+Math.round(client.ws.ping));
     }
 }

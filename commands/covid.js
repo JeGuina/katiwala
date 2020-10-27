@@ -34,7 +34,7 @@ module.exports = {
                 message.channel.send(embed)
             })
         } else {
-            fetch(`https://covid19.mathdro.id/api/${countries}`)
+            fetch(`https://covid19.mathdro.id/api/countries/${countries}`)
             .then(response => response.json())
             .then(data => {
                 let confirmed = data.confirmed.value.toLocaleString()

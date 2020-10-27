@@ -9,8 +9,9 @@ module.exports = {
         const sayMessage = args.join(' ');
         const channel = message.channel.id == '765833025216053249';
         const ventch = message.guild.channels.cache.find(vent => vent.name === "venting-machine");
+        let delcount = 1;
         let datenow = Date.now();
-        message.delete().catch(err => console.log(err));
+        message.channel.bulkDelete(delcount);
 
         if(!channel){
             message.channel.send(`**You are not allowed to do that command here!**`)
