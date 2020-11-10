@@ -20,22 +20,26 @@ client.on('error', console.error);
 
 client.on('ready', () => {
     console.log(`${client.user.tag} is now online!`);
-    var memberCount = client.guilds.cache.reduce((a, g) => a + g.memberCount, 0);
+    const guild = client.guilds.cache.get("750710232887591013");
+    var memberCount = guild.members.cache.filter(member => !member.user.bot).size;
     client.user.setActivity(`with ${memberCount} crewmates`, { type: "PLAYING" });
 });
 
+
+
 client.on('guildMemberAdd', member => {
-    const chanID = '755992240312287243';
-    const channel = member.guild.channels.cache.get(chanID);
+    const channel = member.guild.channels.cache.find(channel => channel.name === "welcome");
     if(!channel) return;
 
-    channel.send(`Yo! What's up, ${member}? Welcome to the Trust Issues PH Server! Enjoy!`);
-    var memberCount = client.guilds.cache.reduce((a, g) => a + g.memberCount, 0);
+    channel.send(`Yo! What's up, ${member}? Welcome to ***TRUST ISSUES PH*** Server! Enjoy!`);
+    const guild = client.guilds.cache.get("750710232887591013");
+    var memberCount = guild.members.cache.filter(member => !member.user.bot).size;
     client.user.setActivity(`with ${memberCount} members`, { type: "PLAYING" });
 });
 
-client.on('guildMemberRemove', () => {
-    var memberCount = client.guilds.cache.reduce((a, g) => a + g.memberCount, 0);
+client.on('guildMemberRemove', member => {
+    const guild = client.guilds.cache.get("750710232887591013");
+    var memberCount = guild.members.cache.filter(member => !member.user.bot).size;
     client.user.setActivity(`with ${memberCount} members`, { type: "PLAYING" });
 });
 
