@@ -31,7 +31,7 @@ client.on('guildMemberAdd', member => {
     const channel = member.guild.channels.cache.find(channel => channel.name === "welcome");
     if(!channel) return;
 
-    channel.send(`Yo! What's up, ${member}? Welcome to ***TRUST ISSUES PH*** Server! Enjoy!`);
+    channel.send(`Yo! What's up, ${member}? Welcome to **TRUST ISSUES PH** Server! Enjoy!`);
     const guild = client.guilds.cache.get("750710232887591013");
     var memberCount = guild.members.cache.filter(member => !member.user.bot).size;
     client.user.setActivity(`with ${memberCount} members`, { type: "PLAYING" });
