@@ -6,6 +6,8 @@ const client = new Discord.Client();
 client.commands = new Discord.Collection();
 client.db = require('quick.db');
 client.cooldown = new Discord.Collection();
+const picExt = [".webp",".png",".jpg",".jpeg",".gif"];
+const vidExt = [".mp4",".webm",".mov"];
 
 const prefix = process.env.PREFIX;
 
@@ -25,8 +27,6 @@ client.on('ready', () => {
     client.user.setActivity(`with ${memberCount} crewmates`, { type: "PLAYING" });
 });
 
-
-
 client.on('guildMemberAdd', member => {
     const channel = member.guild.channels.cache.find(channel => channel.name === "welcome");
     if(!channel) return;
@@ -37,7 +37,7 @@ client.on('guildMemberAdd', member => {
     client.user.setActivity(`with ${memberCount} members`, { type: "PLAYING" });
 });
 
-client.on('guildMemberRemove', member => {
+client.on('guildMemberRemove', () => {
     const guild = client.guilds.cache.get("750710232887591013");
     var memberCount = guild.members.cache.filter(member => !member.user.bot).size;
     client.user.setActivity(`with ${memberCount} members`, { type: "PLAYING" });
@@ -77,10 +77,41 @@ client.on("messageUpdate", async message => {
     logchannel.send(embed);
 })
 
-client.on("message", async message => {
+client.on("message", async (message) => {
     if(message.author.bot) return;
-    if(message.channel.type == 'dm') return;
+    if(message.channel.type == 'dm') {
+        if (message.content.length > 1024) return message.channel.send('Your message should be no longer than 1024 characters');
+        else {
+            await message.react('👍');
+            message.channel.send('Your message has been anonymously sent!');
+            let count = JSON.parse(fs.readFileSync('./count.json')).count;
+            let d = new Date();
+            count++;
 
+            if(message.content == ""){
+                message.content = "n/a";
+            }
+            const cChanId = '765833025216053249';
+            const confessChan = client.channels.cache.get(cChanId);
+            if(!confessChan) return;
+            const embed = new Discord.MessageEmbed()
+            .setTitle("Anon #" +count)
+            .addField("Message", `${message.content}`)
+            .setFooter(new Date(d.toLocaleString()))
+            if(message.attachments.array().length > 0) {
+            let attachment = message.attachments.array()[0];
+            picExt.forEach(ext => {
+                if(attachment.name.endsWith(ext)) embed.setImage(attachment.attachment);
+            });
+            vidExt.forEach(ext => {
+                if(attachment.name.endsWith(ext)) confessChan.send(attachment);
+            });
+        }
+            confessChan.send(embed);
+            fs.writeFileSync('./count.json', JSON.stringify({ count: count }));
+
+        }
+    }
     // xp(message); **for XP stuff soon
 
     if(message.content.startsWith(prefix)){
@@ -97,6 +128,8 @@ client.on("message", async message => {
             console.error(error);
         }
     }
+
+
 });
 
 // function xp(message) {
