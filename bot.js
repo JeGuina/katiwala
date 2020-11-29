@@ -4,8 +4,6 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 
 client.commands = new Discord.Collection();
-client.db = require('quick.db');
-client.cooldown = new Discord.Collection();
 const picExt = [".webp",".png",".jpg",".jpeg",".gif"];
 const vidExt = [".mp4",".webm",".mov"];
 
@@ -146,6 +144,5 @@ client.on("message", async (message) => {
 // }
 
 //remove comment for xp stuff sooooon
-
 
 client.login(process.env.BOT_TOKEN);

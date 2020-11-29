@@ -1,22 +1,64 @@
-const db = require('quick.db');
-const ms = require('parse-ms');
+const Discord = require("discord.js");
+const ms = require("parse-ms");
+const mongoose = require("mongoose");
+
+//DB Connect
+mongoose.connect(process.env.MONGOPASS, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
+
+//mode;s
+const Data = require("../models/data.js");
+
 
 module.exports = {
     name: "daily",
-    description: "daily credits",
+    description: "collect daily credits",
 
     async run (client, message, args){
-        let timeout = 86400000;
-        let amount = 200;
+       let timeout = 86400000;
+       let reward = 100;
 
-        let daily = await db.fetch(`daily_${message.guild.id}_${user.id}`);
+       let embed = new Discord.MessageEmbed();
+       embed.setTitle("Daily Katiwala Coins");
 
-        if(daily !== null && timeout - (Date.now() - daily) > 0){
-            let time = ms(timeout - (Date.now() - daily));
-
-            return message.channel.send(`You've already collected your daily credits. Come back in ${time.days}d, ${time.hours}h, ${time.minutes}m, and ${time.seconds}s`);
+       Data.findOne({
+        userID: message.author.id
+    }, (err,data) => {
+        if(err) console.log(err);
+        if(!data){
+            const newData = new Data({
+                name: message.author.username,
+                userID: message.author.id,
+                lb: "all",
+                money: reward,
+                daily: Date.now(),
+            })
+            newData.save().catch(err => console.log(err));
+            let embed = new Discord.MessageEmbed()
+            .setDescription(`${message.member.displayName}'s KCoins: **${reward}**`)
+            .setColor("#00ff00")
+            message.channel.send(embed);
         } else {
-            db.add(`money_${message.guild.id}_${user.id}`, amount);
+            if(timeout - (Date.now() - data.daily) > 0){
+                let time = ms(timeout - (Date.now() - data.daily));
+
+                embed.setColor("#ff0000");
+                embed.setDescription(`**${message.member.displayName}, you've already collected your daily KCoins for today.**`);
+                embed.addField(`Time until next collection:`, `${time.hours}h, ${time.minutes}m, ${time.seconds}s`);
+                return message.channel.send(embed);
+            } else {
+                data.money += reward;
+                data.daily = Date.now();
+                data.save().catch(err => console.log(err));
+
+                embed.setDescription(`You got ${reward} KCoins! Come back tomorrow to get your daily KCoins!\nCurrent balance: **${data.money} KCoins**`);
+                embed.setColor("#00ff00");
+                return message.channel.send(embed);
+            }
         }
+    })
     }
+
 }
