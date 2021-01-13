@@ -75,6 +75,8 @@ client.on("messageUpdate", async message => {
     logchannel.send(embed);
 })
 
+let count = 1;
+
 client.on("message", async (message) => {
     if(message.author.bot) return;
     if(message.channel.type == 'dm') {
@@ -82,7 +84,7 @@ client.on("message", async (message) => {
         else {
             await message.react('👍');
             message.channel.send('Your message has been anonymously sent!');
-            let count = JSON.parse(fs.readFileSync('./count.json')).count;
+            // let count = JSON.parse(fs.readFileSync('./count.json')).count;
             let d = new Date();
             count++;
 
