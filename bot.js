@@ -2,6 +2,17 @@ require('dotenv').config();
 const fs = require('fs');
 const Discord = require('discord.js');
 const client = new Discord.Client();
+const mongoose = require("mongoose");
+
+//Connect to Database
+
+mongoose.connect(process.env.MONGOPASS, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
+
+// MODELS
+const Anon = require("./models/anonCount.js");
 
 client.commands = new Discord.Collection();
 const picExt = [".webp",".png",".jpg",".jpeg",".gif"];
@@ -75,8 +86,6 @@ client.on("messageUpdate", async message => {
     logchannel.send(embed);
 })
 
-let count = 1;
-
 client.on("message", async (message) => {
     if(message.author.bot) return;
     if(message.channel.type == 'dm') {
@@ -86,30 +95,37 @@ client.on("message", async (message) => {
             message.channel.send('Your message has been anonymously sent!');
             // let count = JSON.parse(fs.readFileSync('./count.json')).count;
             let d = new Date();
-            count++;
 
-            if(message.content == ""){
-                message.content = "n/a";
+            Anon.findOne({
+                anonID: 1,
+            }, (err, cnt) => {
+                if(err) console.log(err);
+                if(cnt){
+                    if(message.content == ""){
+                        message.content = "n/a";
+                    }
+                    acount = cnt.anonCount += 1;
+                    const cChanId = '765833025216053249';
+                    const confessChan = client.channels.cache.get(cChanId);
+                    if(!confessChan) return;
+                    const embed = new Discord.MessageEmbed()
+                    .setTitle("Anon #" +acount)
+                    .addField("Message", `${message.content}`)
+                    .setFooter(new Date(d.toLocaleString()))
+                    if(message.attachments.array().length > 0) {
+                    let attachment = message.attachments.array()[0];
+                    picExt.forEach(ext => {
+                        if(attachment.name.endsWith(ext)) embed.setImage(attachment.attachment);
+                    });
+                    vidExt.forEach(ext => {
+                        if(attachment.name.endsWith(ext)) confessChan.send(attachment);
+                    });
+                }
+                    confessChan.send(embed);
+                    cnt.save().catch(err => console.log(err));
             }
-            const cChanId = '765833025216053249';
-            const confessChan = client.channels.cache.get(cChanId);
-            if(!confessChan) return;
-            const embed = new Discord.MessageEmbed()
-            .setTitle("Anon #" +count)
-            .addField("Message", `${message.content}`)
-            .setFooter(new Date(d.toLocaleString()))
-            if(message.attachments.array().length > 0) {
-            let attachment = message.attachments.array()[0];
-            picExt.forEach(ext => {
-                if(attachment.name.endsWith(ext)) embed.setImage(attachment.attachment);
-            });
-            vidExt.forEach(ext => {
-                if(attachment.name.endsWith(ext)) confessChan.send(attachment);
-            });
-        }
-            confessChan.send(embed);
-            fs.writeFileSync('./count.json', JSON.stringify({ count: count }));
-
+                
+            })
         }
     }
     // xp(message); **for XP stuff soon
