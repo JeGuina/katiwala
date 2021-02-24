@@ -1,18 +1,9 @@
 require('dotenv').config();
 const fs = require('fs');
 const Discord = require('discord.js');
+const { db } = require('./models/data');
 const client = new Discord.Client();
-const mongoose = require("mongoose");
-
-//Connect to Database
-
-mongoose.connect(process.env.MONGOPASS, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-});
-
-// MODELS
-const Anon = require("./models/anonCount.js");
+const sqlite = require('sqlite3').verbose();
 
 client.commands = new Discord.Collection();
 const picExt = [".webp",".png",".jpg",".jpeg",".gif"];
@@ -34,6 +25,8 @@ client.on('ready', () => {
     const guild = client.guilds.cache.get("750710232887591013");
     var memberCount = guild.members.cache.filter(member => !member.user.bot).size;
     client.user.setActivity(`with ${memberCount} crewmates`, { type: "PLAYING" });
+
+    let db = new sqlite.Database('./ktwl_db.db', sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE);
 });
 
 client.on('guildMemberAdd', member => {
@@ -86,8 +79,12 @@ client.on("messageUpdate", async message => {
     logchannel.send(embed);
 })
 
+let count = 0;
+
 client.on("message", async (message) => {
     if(message.author.bot) return;
+    let db = new sqlite.Database('./ktwl_db.db', sqlite.OPEN_READWRITE);
+    db.run(`CREATE TABLE IF NOT EXISTS anonctr(anonID INTEGER NOT NULL, anonCount INTEGER NOT NULL)`);
     if(message.channel.type == 'dm') {
         if (message.content.length > 1024) return message.channel.send('Your message should be no longer than 1024 characters');
         else {
@@ -95,37 +92,38 @@ client.on("message", async (message) => {
             message.channel.send('Your message has been anonymously sent!');
             // let count = JSON.parse(fs.readFileSync('./count.json')).count;
             let d = new Date();
+            var res = 0;
+            db.run(`UPDATE anonctr SET anonCount = anonCount + 1 WHERE anonID = 1`);
 
-            Anon.findOne({
-                anonID: 1,
-            }, (err, cnt) => {
-                if(err) console.log(err);
-                if(cnt){
-                    if(message.content == ""){
-                        message.content = "n/a";
-                    }
-                    acount = cnt.anonCount += 1;
-                    const cChanId = '765833025216053249';
-                    const confessChan = client.channels.cache.get(cChanId);
-                    if(!confessChan) return;
-                    const embed = new Discord.MessageEmbed()
-                    .setTitle("Anon #" +acount)
-                    .addField("Message", `${message.content}`)
-                    .setFooter(new Date(d.toLocaleString()))
-                    if(message.attachments.array().length > 0) {
-                    let attachment = message.attachments.array()[0];
-                    picExt.forEach(ext => {
-                        if(attachment.name.endsWith(ext)) embed.setImage(attachment.attachment);
-                    });
-                    vidExt.forEach(ext => {
-                        if(attachment.name.endsWith(ext)) confessChan.send(attachment);
-                    });
+            let selq = `SELECT anonCount FROM anonctr`;
+            db.all(selq, function(err, rows) {
+                if(err){
+                    console.log(err);
+                } else {
+                    res = res + rows[0].anonCount;
                 }
-                    confessChan.send(embed);
-                    cnt.save().catch(err => console.log(err));
+                if(message.content == ""){
+                    message.content = "n/a";
+                }
+                const cChanId = '765833025216053249';
+                const confessChan = client.channels.cache.get(cChanId);
+                if(!confessChan) return;
+                const embed = new Discord.MessageEmbed()
+                .setTitle("Anon #" +res)
+                .addField("Message", `${message.content}`)
+                .setFooter(new Date(d.toLocaleString()))
+                if(message.attachments.array().length > 0) {
+                let attachment = message.attachments.array()[0];
+                picExt.forEach(ext => {
+                    if(attachment.name.endsWith(ext)) embed.setImage(attachment.attachment);
+                });
+                vidExt.forEach(ext => {
+                    if(attachment.name.endsWith(ext)) confessChan.send(attachment);
+                });
             }
-                
-            })
+                confessChan.send(embed);
+            });
+            db.close();
         }
     }
     // xp(message); **for XP stuff soon
