@@ -1,7 +1,6 @@
 require('dotenv').config();
 const fs = require('fs');
 const Discord = require('discord.js');
-const { db } = require('./models/data');
 const client = new Discord.Client();
 const sqlite = require('sqlite3').verbose();
 
