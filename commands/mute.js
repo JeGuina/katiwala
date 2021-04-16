@@ -6,7 +6,7 @@ module.exports = {
     description: "mutes a member temporarily",
     aliases: ["crate", "tempmute"],
 
-    async run (client, message, args){
+    execute(client, message, args){
         let messageArray = message.content.split(' ');
         let arg = messageArray.slice(1);
         let cmd = messageArray[0];

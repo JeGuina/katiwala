@@ -6,11 +6,11 @@ module.exports = {
     description: "gives you a random cat pic",
     aliases: ["cat"],
     
-    async run (client, message, args){
+    execute(client, message, args){
         const subReddits = ["cats"]
         const random = subReddits[Math.floor(Math.random() * subReddits.length)]
 
-        const img = await randomPuppy(random);
+        const img = randomPuppy(random);
 
         const embed = new Discord.MessageEmbed()
         .setColor("RANDOM")

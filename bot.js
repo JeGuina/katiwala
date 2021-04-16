@@ -1,12 +1,37 @@
+const express = require('express');
+const app = express();
+const port = 3000;
+
+app.get('/', (req, res) => res.send('How did you get here?'));
+
+app.listen(port, () => console.log(`Katiwala Bot is now Online!`));
+
+
 require('dotenv').config();
 const fs = require('fs');
+const cnt = require('./count.json');
 const Discord = require('discord.js');
 const client = new Discord.Client();
-const sqlite = require('sqlite3').verbose();
+const mongoose = require('mongoose');
+
+const dataModel = require('./models/anonCount');
+const profileModel = require('./models/profileSchema');
+const { profile } = require('console');
 
 client.commands = new Discord.Collection();
 const picExt = [".webp",".png",".jpg",".jpeg",".gif"];
 const vidExt = [".mp4",".webm",".mov"];
+
+mongoose.connect(process.env.MONGOPASS, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+    useCreateIndex: true
+}).then(() =>{
+    console.log('Database connected successfully.');
+}).catch((err) => {
+    console.log(err);
+});
 
 const prefix = process.env.PREFIX;
 
@@ -25,7 +50,7 @@ client.on('ready', () => {
     var memberCount = guild.members.cache.filter(member => !member.user.bot).size;
     client.user.setActivity(`with ${memberCount} crewmates`, { type: "PLAYING" });
 
-    let db = new sqlite.Database('./ktwl_db.db', sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE);
+    // let db = new sqlite.Database('./ktwl_db.db', sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE);
 });
 
 client.on('guildMemberAdd', member => {
@@ -36,6 +61,15 @@ client.on('guildMemberAdd', member => {
     const guild = client.guilds.cache.get("750710232887591013");
     var memberCount = guild.members.cache.filter(member => !member.user.bot).size;
     client.user.setActivity(`with ${memberCount} members`, { type: "PLAYING" });
+
+    let profile = profileModel.create({
+        userID: member.id,
+        username: member.tag,
+        serverID: member.guild.id,
+        kcoins: 100,
+        daily: 0
+    });
+    profile.save();
 });
 
 client.on('guildMemberRemove', () => {
@@ -78,37 +112,30 @@ client.on("messageUpdate", async message => {
     logchannel.send(embed);
 })
 
-let count = 0;
-
 client.on("message", async (message) => {
     if(message.author.bot) return;
-    let db = new sqlite.Database('./ktwl_db.db', sqlite.OPEN_READWRITE);
-    db.run(`CREATE TABLE IF NOT EXISTS anonctr(anonID INTEGER NOT NULL, anonCount INTEGER NOT NULL)`);
     if(message.channel.type == 'dm') {
         if (message.content.length > 1024) return message.channel.send('Your message should be no longer than 1024 characters');
         else {
             await message.react('👍');
             message.channel.send('Your message has been anonymously sent!');
-            // let count = JSON.parse(fs.readFileSync('./count.json')).count;
             let d = new Date();
-            var res = 0;
-            db.run(`UPDATE anonctr SET anonCount = anonCount + 1 WHERE anonID = 1`);
 
-            let selq = `SELECT anonCount FROM anonctr`;
-            db.all(selq, function(err, rows) {
-                if(err){
-                    console.log(err);
-                } else {
-                    res = res + rows[0].anonCount;
-                }
-                if(message.content == ""){
-                    message.content = "n/a";
-                }
+            let data = await dataModel.findOneAndUpdate(
+                {
+                    id: 1,
+                }, {
+                    $inc: {
+                        count: 1,
+                    }
+                });
+                console.log(`${data.count}`);
+
                 const cChanId = '765833025216053249';
                 const confessChan = client.channels.cache.get(cChanId);
                 if(!confessChan) return;
                 const embed = new Discord.MessageEmbed()
-                .setTitle("Anon #" +res)
+                .setTitle(`Anon #${data.count}`)
                 .addField("Message", `${message.content}`)
                 .setFooter(new Date(d.toLocaleString()))
                 if(message.attachments.array().length > 0) {
@@ -121,11 +148,26 @@ client.on("message", async (message) => {
                 });
             }
                 confessChan.send(embed);
-            });
-            db.close();
         }
     }
-    // xp(message); **for XP stuff soon
+
+    let profileData;
+
+    try{
+        profileData = await profileModel.findOne({ userID: message.author.id });
+        if(!profileData){
+            let profile = await profileModel.create({
+                userID: message.author.id,
+                username: message.author.tag,
+                serverID: message.guild.id,
+                kcoins: 100,
+                daily: 0
+            });
+            profile.save();
+        }
+    }catch(err){
+        console.log(err);
+    }
 
     if(message.content.startsWith(prefix)){
         const args = message.content.slice(prefix.length).trim().split(/ +/);
@@ -136,7 +178,7 @@ client.on("message", async (message) => {
         if(!command) return;
 
         try{
-            command.run(client, message, args);
+            command.execute(client, message, args, Discord, profileData);
         }catch(error){
             console.error(error);
         }

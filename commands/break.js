@@ -4,8 +4,7 @@ module.exports = {
     name: "break",
     description: "take a break",
     aliases: ["break", "sto", "muteme", "crateme"],
-
-    async run (client, message, args) {
+    execute(client, message, args) {
         let sec = parseInt(args[0]);
         let mins = sec * 60000;
         let datenow = Date.now() + sec * 60000;
@@ -17,7 +16,7 @@ module.exports = {
         if (message.member.roles.cache.has("761970505111568414")) return message.channel.send("Staff can't mute themselves. You have to endure the unending pain of this server.");
 
         message.channel.send(embed.setDescription(`Would you like to take a break for ${sec} minutes? You won't be able to talk until this ends. (yes / no)`).setFooter(new Date (datenow)));
-        await message.channel.awaitMessages(m => m.author.id === message.author.id, {max: 1, time1: 30000})
+        message.channel.awaitMessages(m => m.author.id === message.author.id, {max: 1, time1: 30000})
         .then(collected => {
             if(collected.first().content.toLowerCase() == 'yes'){
 

@@ -3,7 +3,7 @@ module.exports = {
     description: "Clear messages",
     aliases: ["prune", "del"],
 
-    async run (client, message, args){
+    execute(client, message, args){
         const messageArray = message.content.split(' ');
         const arg = messageArray.slice(1);
 

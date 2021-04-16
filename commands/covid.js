@@ -6,7 +6,7 @@ module.exports = {
     name: "covid",
     description: "track COVID of a country or worldwide",
 
-    async run (client, message, args){
+    execute(client, message, args){
         let countries = args.join(" ");
 
         const noArgs = new Discord.MessageEmbed()

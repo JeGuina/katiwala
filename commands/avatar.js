@@ -5,8 +5,7 @@ module.exports = {
     name: "avatar",
     description: "show a user's avatar",
     aliases: ["icon", "pfp", "dp"],
-
-    async run(client, message, args) {
+    execute(client, message, args) {
         let member = message.mentions.users.first() || message.author;
         let avatar = member.displayAvatarURL({size: 1024});
 

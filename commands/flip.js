@@ -5,7 +5,7 @@ module.exports = {
     description: "flip a coin",
     aliases: ["coin"],
 
-    async run (client, message, args){
+    execute(client, message, args){
         var choices = [
             "ulo",
             "buntot"

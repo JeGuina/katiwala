@@ -4,7 +4,7 @@ module.exports = {
     name: "ban",
     description: "Kicks a member from server",
 
-    async run (client, message, args){
+    execute(client, message, args){
         if(!message.member.hasPermission("BAN_MEMBERS")) return message.channel.send("You cannot use that command!");
 
         if(!message.guild.me.hasPermission("BAN_MEMBERS")) return message.channel.send("I do not have the right permission");

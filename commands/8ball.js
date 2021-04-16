@@ -6,7 +6,7 @@ module.exports = {
     aliases: ["kball", "8b"],
     category: "fun",
     usage: "<question>",
-    run: async(client, message, args) => {
+    execute(client, message, args){
         const question = args.join(" ");
         if(!question){
             return message.channel.send("Walang tanong sa sagot, bruh.");
