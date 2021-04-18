@@ -9,14 +9,14 @@ app.listen(port, () => console.log(`Katiwala Bot is now Online!`));
 
 require('dotenv').config();
 const fs = require('fs');
-const cnt = require('./count.json');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const mongoose = require('mongoose');
 
 const dataModel = require('./models/anonCount');
-const profileModel = require('./models/profileSchema');
+const profileModel = require('./models/Economy');
 const { profile } = require('console');
+const dailyModel = require('./models/counters');
 
 client.commands = new Discord.Collection();
 const picExt = [".webp",".png",".jpg",".jpeg",".gif"];
@@ -61,15 +61,6 @@ client.on('guildMemberAdd', member => {
     const guild = client.guilds.cache.get("750710232887591013");
     var memberCount = guild.members.cache.filter(member => !member.user.bot).size;
     client.user.setActivity(`with ${memberCount} members`, { type: "PLAYING" });
-
-    let profile = profileModel.create({
-        userID: member.id,
-        username: member.tag,
-        serverID: member.guild.id,
-        kcoins: 100,
-        daily: 0
-    });
-    profile.save();
 });
 
 client.on('guildMemberRemove', () => {
@@ -129,7 +120,10 @@ client.on("message", async (message) => {
                         count: 1,
                     }
                 });
-                console.log(`${data.count}`);
+
+                if(message.content == ""){
+                  message.content = "n/a";
+                }
 
                 const cChanId = '765833025216053249';
                 const confessChan = client.channels.cache.get(cChanId);
@@ -151,24 +145,6 @@ client.on("message", async (message) => {
         }
     }
 
-    let profileData;
-
-    try{
-        profileData = await profileModel.findOne({ userID: message.author.id });
-        if(!profileData){
-            let profile = await profileModel.create({
-                userID: message.author.id,
-                username: message.author.tag,
-                serverID: message.guild.id,
-                kcoins: 100,
-                daily: 0
-            });
-            profile.save();
-        }
-    }catch(err){
-        console.log(err);
-    }
-
     if(message.content.startsWith(prefix)){
         const args = message.content.slice(prefix.length).trim().split(/ +/);
         const commandName = args.shift().toLowerCase();
@@ -178,7 +154,7 @@ client.on("message", async (message) => {
         if(!command) return;
 
         try{
-            command.execute(client, message, args, Discord, profileData);
+            command.execute(client, message, args);
         }catch(error){
             console.error(error);
         }
@@ -186,20 +162,5 @@ client.on("message", async (message) => {
 
 
 });
-
-// function xp(message) {
-//     if (!client.cooldown.has(`${message.author.id}`) || !(Date.now() - client.cooldown.get(`${message.author.id}`) > process.env.COOLDOWN)) {
-//         let xp = client.db.add(`xp_${message.author.id}`, 1);
-//         let level = Math.floor(0.3 * Math.sqrt(xp));
-//         let lvl = client.db.get(`level_${message.author.id}`) || client.db.set(`level_${message.author.id}`,1);;
-//         if (level > lvl) {
-//             let newLevel = client.db.set(`level_${message.author.id}`,level);
-//             message.channel.send(`:tada: GG! **${message.author.toString()}!** You just advanced to level **${newLevel}!**`);
-//         }
-//         client.cooldown.set(`${message.author.id}`, Date.now());
-//     }
-// }
-
-//remove comment for xp stuff sooooon
 
 client.login(process.env.BOT_TOKEN);
